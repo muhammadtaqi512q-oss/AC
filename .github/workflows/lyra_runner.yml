@@ -1,0 +1,47 @@
+name: Lyra Zero Token AI Engine
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  process-prompt:
+    if: startsWith(github.event.issue.title, 'LYRA_PROMPT:')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install & Run Ollama (Llama-3.2)
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          ollama serve &
+          sleep 5
+          PROMPT="${{ github.event.issue.body }}"
+          RESPONSE=$(ollama run llama3.2:1b "$PROMPT")
+          echo "AI_RESPONSE<<EOF" >> $GITHUB_ENV
+          echo "$RESPONSE" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Reply to Issue via Built-in GITHUB_TOKEN
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const response = process.env.AI_RESPONSE;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### 🤖 Lyra AI Response (Created by Muhammad Taqi)\n\n${response}`
+            });
+            github.rest.issues.update({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'closed'
+            });
