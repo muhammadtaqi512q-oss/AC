@@ -1,7 +1,7 @@
 name: Lyra Zero Token AI Engine
 
 on:
-  issues:
+  issues: 
     types: [opened]
 
 permissions:
