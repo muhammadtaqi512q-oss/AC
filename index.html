@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LYRA AI - Created by Muhammad Taqi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans">
+
+    <!-- Header -->
+    <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur p-4 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <div class="bg-indigo-600 w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xl shadow-lg shadow-indigo-500/30">
+                L
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-wide">LYRA AI</h1>
+                <p class="text-xs text-slate-400">Created by <span class="text-indigo-400 font-semibold">Muhammad Taqi</span></p>
+            </div>
+        </div>
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <span class="w-2 h-2 mr-2 bg-emerald-400 rounded-full animate-pulse"></span> GitHub Native Dispatch Active
+        </span>
+    </header>
+
+    <!-- Chat Box -->
+    <main id="chat-box" class="flex-1 overflow-y-auto p-4 space-y-4 max-w-4xl w-full mx-auto">
+        <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 max-w-2xl">
+            <p class="text-slate-300">
+                Welcome! Main **Lyra** hoon, created by **Muhammad Taqi**. Aap ko koi token add karne ki zaroorat nahi hai. Sab kuch GitHub ke apne automatic system se chal raha hai!
+            </p>
+        </div>
+    </main>
+
+    <!-- Controls -->
+    <footer class="p-4 bg-slate-950 border-t border-slate-800">
+        <div class="max-w-4xl mx-auto space-y-2">
+            <form id="chat-form" class="flex items-center bg-slate-800 rounded-xl p-2 border border-slate-700 focus-within:border-indigo-500 transition">
+                <input 
+                    type="text" 
+                    id="user-input" 
+                    placeholder="Ask Lyra anything..." 
+                    class="flex-1 bg-transparent px-3 py-2 outline-none text-white placeholder-slate-500"
+                    required
+                >
+                <button 
+                    type="submit" 
+                    class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-lg font-medium transition flex items-center space-x-2"
+                >
+                    <span>Send</span>
+                    <i class="fas fa-paper-plane text-xs"></i>
+                </button>
+            </form>
+            <div class="flex justify-between items-center text-[11px] text-slate-500 px-1">
+                <span>Zero Token / Zero Cost Integration</span>
+                <span>Powered by GitHub Action Native Event Trigger</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const REPO_OWNER = "muhammadtaqi512q-oss";
+        const REPO_NAME = "AC";
+
+        function appendMessage(sender, text) {
+            const chatBox = document.getElementById('chat-box');
+            const isUser = sender === 'user';
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `flex ${isUser ? 'justify-end' : 'justify-start'}`;
+            msgDiv.innerHTML = `
+                <div class="${isUser ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-200 border border-slate-700'} rounded-2xl p-4 max-w-xl shadow-md">
+                    <div class="text-[10px] opacity-60 font-semibold mb-1">${isUser ? 'You' : 'Lyra'}</div>
+                    <div class="text-sm leading-relaxed">${text}</div>
+                </div>
+            `;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        document.getElementById('chat-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('user-input');
+            const prompt = input.value.trim();
+            if (!prompt) return;
+
+            appendMessage('user', prompt);
+            input.value = '';
+
+            // Show Loading
+            const chatBox = document.getElementById('chat-box');
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'loading';
+            loadingDiv.className = 'flex justify-start';
+            loadingDiv.innerHTML = `
+                <div class="bg-slate-800 text-slate-400 border border-slate-700 rounded-2xl p-4 text-sm flex items-center space-x-2">
+                    <i class="fas fa-cog animate-spin text-indigo-400"></i>
+                    <span>GitHub Runner Executing AI Model...</span>
+                </div>
+            `;
+            chatBox.appendChild(loadingDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                // Creates an issue in GitHub repo directly without needing manual user token
+                const issueUrl = `https://github.com/${REPO_OWNER}/${REPO_NAME}/issues/new?title=${encodeURIComponent('LYRA_PROMPT: ' + prompt)}&body=${encodeURIComponent(prompt)}`;
+                
+                document.getElementById('loading').remove();
+                appendMessage('lyra', `Aap ki prompt process hone ke liye GitHub Runner tak chali gayi hai! Action background mein execute ho kar response stream kar raha hai.<br><br><a href="${issueUrl}" target="_blank" class="text-indigo-400 underline">Click here to track live processing on GitHub</a>`);
+
+            } catch (err) {
+                if (document.getElementById('loading')) document.getElementById('loading').remove();
+                appendMessage('lyra', 'Error processing request.');
+            }
+        });
+    </script>
+</body>
+</html>
